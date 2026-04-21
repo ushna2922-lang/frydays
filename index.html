@@ -201,7 +201,7 @@
             box-sizing: border-box;
 
             background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
-                url('https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=1920&q=80') center/cover no-repeat;
+                url('https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=500&q=80') center/cover no-repeat;
 
             display: flex;
             align-items: center;
@@ -299,7 +299,7 @@
 
         .menu-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(280px, 350px));
             gap: 30px;
         }
 
@@ -554,6 +554,25 @@
             color: white;
         }
 
+
+        @keyframes shake {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.2);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .cart-shake {
+            animation: shake 0.3s ease;
+        }
+
         /* --- Responsive --- */
         @media (max-width: 992px) {
             .hero-content h1 {
@@ -600,8 +619,6 @@
                     <li><a href="#hero">Home</a></li>
                     <li><a href="#about">About</a></li>
                     <li><a href="#menu">Menu</a></li>
-                    <li><a href="#gallery">Gallery</a></li>
-                    <li><a href="#testimonials">Reviews</a></li>
                     <li><a href="#contact">Contact</a></li>
                 </ul>
                 <div class="hamburger"><i class="fas fa-bars"></i></div>
@@ -616,8 +633,7 @@
             <p>The crunch you crave, right here in the heart of Faisalabad.</p>
             <div class="hero-buttons">
                 <a href="#menu" class="btn">Explore Menu</a>
-                <a href="#contact" class="btn" style="background: transparent; border: 2px solid white;">Book a
-                    Table</a>
+                <a href="tel:+923261180101" class="btn" style="background: transparent; border: 2px solid white; display: flex; justify-content: center; align-items: center; gap: 7px;"><i class="fas fa-phone" ></i><span>Call Now</span></a>
             </div>
         </div>
     </section>
@@ -658,9 +674,19 @@
                 <h2>Our Crafted Menu</h2>
                 <p>Taste the masterpiece in every bite</p>
             </div>
+
+            <!-- Category Filters -->
+            <div
+                style="text-align:center; margin-bottom: 30px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
+                <button class="btn" onclick="filterMenu('all')" style="padding: 8px 20px;">All</button>
+                <button class="btn" onclick="filterMenu('burger')" style="padding: 8px 20px;">Burgers</button>
+                <button class="btn" onclick="filterMenu('fries')" style="padding: 8px 20px;">Fries</button>
+                <button class="btn" onclick="filterMenu('wrap')" style="padding: 8px 20px;">Wraps</button>
+            </div>
+
             <div class="menu-grid">
                 <!-- Item 1 -->
-                <div class="menu-item" data-aos="zoom-in">
+                <div class="menu-item" data-category="burger" data-aos="zoom-in">
                     <img src="https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?auto=format&fit=crop&w=500&q=80"
                         class="menu-img">
                     <div class="menu-info">
@@ -689,7 +715,7 @@
                 </div>
 
                 <!-- Item 2 -->
-                <div class="menu-item" data-aos="zoom-in" data-aos-delay="100">
+                <div class="menu-item" data-category="fries" data-aos="zoom-in" data-aos-delay="100">
                     <img src="https://images.unsplash.com/photo-1626645738196-c2a7c87a8f58?auto=format&fit=crop&w=500&q=80"
                         class="menu-img">
                     <div class="menu-info">
@@ -718,7 +744,7 @@
                 </div>
 
                 <!-- Item 3 -->
-                <div class="menu-item" data-aos="zoom-in" data-aos-delay="200">
+                <div class="menu-item" data-category="wrap" data-aos="zoom-in" data-aos-delay="200">
                     <img src="https://images.unsplash.com/photo-1551782450-a2132b4ba21d?auto=format&fit=crop&w=500&q=80"
                         class="menu-img">
                     <div class="menu-info">
@@ -746,7 +772,7 @@
                     </div>
                 </div>
                 <!-- Item 4 -->
-                <div class="menu-item" data-aos="zoom-in" data-aos-delay="300">
+                <div class="menu-item" data-category="burger" data-aos="zoom-in" data-aos-delay="300">
                     <img src="https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&w=500&q=80"
                         class="menu-img" alt="Slider">
                     <div class="menu-info">
@@ -774,7 +800,7 @@
                     </div>
                 </div>
                 <!-- Item 5 -->
-                <div class="menu-item" data-aos="zoom-in">
+                <div class="menu-item" data-category="fries" data-aos="zoom-in">
                     <img src="https://images.unsplash.com/photo-1562967914-608f82629710?auto=format&fit=crop&w=500&q=80"
                         class="menu-img" alt="Wings">
                     <div class="menu-info">
@@ -802,7 +828,7 @@
                     </div>
                 </div>
                 <!-- Item 6 -->
-                <div class="menu-item" data-aos="zoom-in" data-aos-delay="100">
+                <div class="menu-item" data-category="burger" data-aos="zoom-in" data-aos-delay="100">
                     <img src="https://images.unsplash.com/photo-1572490122747-3968b75cc699?auto=format&fit=crop&w=500&q=80"
                         class="menu-img" alt="Shake">
                     <div class="menu-info">
@@ -831,15 +857,14 @@
                 </div>
             </div>
             <div style="text-align: center; margin-top: 30px;">
-                <button onclick="sendCartToWhatsApp()" class="btn" style="background: #27ae60; font-size: 1.2rem;">
-                    <i class="fab fa-whatsapp"></i>  Checkout
-                </button>
+                <button onclick="sendCartToWhatsApp()" class="btn"
+                    style="background:#27ae60; width:25%;">Checkout</button>
             </div>
         </div>
     </section>
 
     <!-- Gallery Section -->
-    <section id="gallery" class="section-padding">
+    <!-- <section id="gallery" class="section-padding">
         <div class="container">
             <div class="section-title" data-aos="fade-up">
                 <h2>Cuisine Gallery</h2>
@@ -866,10 +891,10 @@
                         alt="Inside"></div>
             </div>
         </div>
-    </section>
+    </section> -->
 
     <!-- Testimonials Section -->
-    <section id="testimonials" class="section-padding">
+    <!-- <section id="testimonials" class="section-padding">
         <div class="container">
             <div class="section-title" data-aos="fade-up">
                 <h2 style="color: white;">What Our Guests Say</h2>
@@ -909,7 +934,7 @@
                 </div>
             </div>
         </div>
-    </section>
+    </section> -->
 
     <!-- Contact Section -->
     <section id="contact" class="section-padding">
@@ -940,8 +965,8 @@
                         <input type="text" placeholder="Your Name" required>
                         <input type="email" placeholder="Email Address" required>
                         <input type="text" placeholder="Phone Number" required>
-                        <textarea rows="5" placeholder="Your Message / Reservation Details"></textarea>
-                        <button type="submit" class="btn">Send Message</button>
+                        <textarea rows="5" placeholder="Your Message"></textarea>
+                        <button type="submit" class="btn" style="width: 100%; padding: 16px 0px;">Send Message</button>
                     </form>
                 </div>
             </div>
@@ -989,7 +1014,7 @@
     <!-- Back to Top & WhatsApp -->
     <div class="back-to-top" id="backToTop"><i class="fas fa-chevron-up"></i></div>
     <!-- Updated Floating Cart Button -->
-    <div class="whatsapp-float" onclick="sendCartToWhatsApp()"
+    <div onclick="toggleCart()" class="whatsapp-float"
         style="cursor:pointer; background:#27ae60; position:fixed; bottom:30px; right:20px; width:60px; height:60px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-size:24px; box-shadow:0 4px 10px rgba(0,0,0,0.3);">
         <i class="fas fa-shopping-cart"></i>
         <span id="cart-count"
@@ -1001,6 +1026,37 @@
         <span class="close-lightbox">&times;</span>
         <img src="" alt="Lightbox">
     </div>
+
+    <!-- Cart Modal -->
+    <div id="cartModal"
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999; align-items:center; justify-content:center;">
+        <div
+            style="background:white; padding:30px; border-radius:15px; width:90%; max-width:400px; max-height:80vh; overflow-y:auto;">
+            <h2 style="margin-bottom:20px;">Your Cart</h2>
+            <div id="cartItemsList"></div>
+            <div id="cartTotal" style="margin-top:20px; font-weight:bold; font-size:1.2rem;"></div>
+
+            <div style="text-align: center; margin-top: 10px;">
+                <button onclick="clearCart()"
+                    style="background: transparent; border: none; color: #e74c3c; cursor: pointer; font-size: 0.9rem; text-decoration: underline;">
+                    Clear Cart
+                </button>
+            </div>
+            <!-- Inside the cartModal div, before the buttons -->
+            <textarea id="orderNotes" placeholder="Any special instructions? (e.g. No spicy, extra sauce)"
+                style="width:100%; padding:10px; margin:10px 0; border:1px solid #ccc; border-radius:5px;"></textarea>
+            <div style="margin-top:20px; display:flex; gap:10px;">
+                <button onclick="toggleCart()" class="btn" style="background:#7f8c8d; width:50%;">Close</button>
+                <button onclick="sendCartToWhatsApp()" class="btn"
+                    style="background:#27ae60; width:50%;">Checkout</button>
+            </div>
+        </div>
+
+    </div>
+
+
+
+
 
     <!-- JS Scripts -->
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
@@ -1061,34 +1117,145 @@
             alert('Thank you for contacting Love Bites! We will get back to you shortly.');
             this.reset();
         });
-        let cart = {};
+
+
+
+        function clearCart() {
+            if (confirm("Are you sure you want to clear your cart?")) {
+                cart = {};
+                localStorage.removeItem('frydaysCart');
+                renderCartUI();
+                toggleCart();
+            }
+        }
+
+        // cart functionality
+        let cart = JSON.parse(localStorage.getItem('frydaysCart')) || {};
 
         function updateCart(name, price, change) {
             if (!cart[name]) cart[name] = { price: price, qty: 0 };
             cart[name].qty = Math.max(0, cart[name].qty + change);
+            if (cart[name].qty === 0) delete cart[name];
 
-            // Update the display for this item
-            document.getElementById(`qty-${name.replace(/\s+/g, '-')}`).innerText = cart[name].qty;
+            localStorage.setItem('frydaysCart', JSON.stringify(cart));
+            renderCartUI();
 
-            // Update total items count in floating button
-            let totalQty = Object.values(cart).reduce((sum, item) => sum + item.qty, 0);
+            // Add this line to trigger the shake
+            const cartBtn = document.querySelector('.whatsapp-float');
+            cartBtn.classList.add('cart-shake');
+            setTimeout(() => cartBtn.classList.remove('cart-shake'), 300);
+
+            // Update Tab Title
+            const totalQty = Object.values(cart).reduce((sum, item) => sum + item.qty, 0);
+            document.title = totalQty > 0 ? `(${totalQty}) Frydays Order` : "Frydays | Fries, Burgers & Wraps";
+
+        }
+
+        function renderCartUI() {
+            // Update all buttons on the menu page
+            document.querySelectorAll('[id^="qty-"]').forEach(el => el.innerText = '0');
+            Object.entries(cart).forEach(([name, data]) => {
+                const el = document.getElementById(`qty-${name.replace(/\s+/g, '-')}`);
+                if (el) el.innerText = data.qty;
+            });
+
+            // Update total count on floating button
+            const totalQty = Object.values(cart).reduce((sum, item) => sum + item.qty, 0);
             document.getElementById('cart-count').innerText = totalQty;
         }
 
-        function sendCartToWhatsApp() {
-            let items = Object.entries(cart).filter(([name, data]) => data.qty > 0);
-            if (items.length === 0) return alert("Cart is empty!");
+        function toggleCart() {
+            const modal = document.getElementById('cartModal');
+            const list = document.getElementById('cartItemsList');
+            const deliveryFee = 150; // Set your delivery fee here
 
-            let total = 0;
+            const isOpening = modal.style.display !== 'flex';
+            modal.style.display = isOpening ? 'flex' : 'none';
+
+
+
+            if (isOpening) {
+                list.innerHTML = "";
+                let subtotal = 0;
+                Object.entries(cart).forEach(([name, data]) => {
+                    list.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                <span>${data.qty}x ${name}</span> <span>Rs. ${data.price * data.qty}</span>
+            </div>`;
+                    subtotal += (data.price * data.qty);
+                });
+
+                // Add Delivery Fee Row
+                list.innerHTML += `<hr><div style="display:flex; justify-content:space-between; margin-top:10px;">
+            <span>Delivery Fee</span> <span>Rs. ${deliveryFee}</span>
+        </div>`;
+
+                let grandTotal = subtotal + deliveryFee;
+                document.getElementById('cartTotal').innerText = "Total: Rs. " + grandTotal;
+            }
+
+            if (Object.keys(cart).length === 0) {
+                list.innerHTML = "<p style='text-align:center;'>Your cart is hungry! Add some items first. 🍔</p>";
+                document.getElementById('cartTotal').innerText = "";
+                // Hide checkout button if empty
+            } else {
+                // Show checkout button
+            }
+        }
+
+
+        function filterMenu(category) {
+            const items = document.querySelectorAll('.menu-item');
+            items.forEach(item => {
+                if (category === 'all' || item.getAttribute('data-category') === category) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+
+        
+
+        function sendCartToWhatsApp() {
+            const items = Object.entries(cart);
+            if (items.length === 0) return alert("Your cart is empty!");
+
+            const deliveryFee = 150; // Set your delivery fee here
+            let subtotal = 0;
+
+            const minOrder = 600;
+            if (subtotal < minOrder) {
+                alert("Minimum order for delivery is Rs. " + minOrder);
+                return;
+            }
+
             let message = "Hi! I want to order from Frydays:%0A";
             items.forEach(([name, data]) => {
                 message += `- ${data.qty}x ${name} (Rs. ${data.price * data.qty})%0A`;
-                total += (data.price * data.qty);
+                subtotal += (data.price * data.qty);
             });
-            message += `%0A*Total: Rs. ${total}*%0A%0APlease confirm my order.`;
 
-            window.open(`https://wa.me/923261180101?text=${message}`, '_blank');
+            let grandTotal = subtotal + deliveryFee;
+
+            message += `%0A*Subtotal:* Rs. ${subtotal}`;
+            message += `%0A*Delivery Fee:* Rs. ${deliveryFee}`;
+            message += `%0A*Total Amount:* Rs. ${grandTotal}%0A%0APlease confirm my order.`;
+
+            const phone = "923261180101";
+            window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
+
+            // NEW: Clear Cart after sending
+            cart = {};
+            localStorage.removeItem('frydaysCart');
+            renderCartUI();
+            toggleCart(); // Close the popup
+
+            const notes = document.getElementById('orderNotes').value;
+            if (notes) message += `%0A*Notes:* ${notes}`;
         }
+
+        // Initialize on page load
+        renderCartUI();
     </script>
 </body>
 
