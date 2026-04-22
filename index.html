@@ -1018,6 +1018,21 @@
         // 1. Initialize AOS
         AOS.init({ duration: 800, once: true });
 
+        // Mobile Navigation
+        const hamburger = document.querySelector('.hamburger');
+        const navLinks = document.querySelector('.nav-links');
+
+        hamburger.addEventListener('click', () => {
+            navLinks.classList.toggle('active');
+        });
+
+        // Close menu on link click
+        document.querySelectorAll('.nav-links a').forEach(link => {
+            link.addEventListener('click', () => {
+                navLinks.classList.remove('active');
+            });
+        });
+
         // 2. State & Data
         let cart = JSON.parse(localStorage.getItem('frydaysCart')) || {};
         const SHEETS_API = "https://script.google.com/macros/s/AKfycby9I7sldy-HIIrGJgjILk_y_eEDDSklpX73HJNT4Wf0tyJNMDb0Ca87wj0seb5UsAfC/exec";
@@ -1150,22 +1165,34 @@
 
             const deliveryFee = 150;
             let subtotal = 0;
-            let message = "Hi! I want to order from Frydays:%0A";
+
+            // Use \n for the actual message, then encode the whole thing
+            let message = "Hi! I want to order from Frydays:\n\n";
 
             items.forEach(([name, data]) => {
-                message += `- ${data.qty}x ${name} (Rs. ${data.price * data.qty})%0A`;
-                subtotal += (data.price * data.qty);
+                const itemTotal = data.price * data.qty;
+                message += `• ${data.qty}x ${name} (Rs. ${itemTotal})\n`;
+                subtotal += itemTotal;
             });
 
-            if (subtotal < 600) return alert("Minimum order for delivery is Rs. 600");
+            if (subtotal < 600) {
+                alert("Minimum order for delivery is Rs. 600. Your total is Rs. " + subtotal);
+                return;
+            }
 
             const grandTotal = subtotal + deliveryFee;
-            message += `%0A*Subtotal:* Rs. ${subtotal}%0A*Delivery:* Rs. ${deliveryFee}%0A*Total:* Rs. ${grandTotal}`;
+            message += `\n*Subtotal:* Rs. ${subtotal}`;
+            message += `\n*Delivery:* Rs. ${deliveryFee}`;
+            message += `\n*Total:* Rs. ${grandTotal}`;
 
             const notes = document.getElementById('orderNotes').value;
-            if (notes) message += `%0A%0A*Notes:* ${notes}`;
+            if (notes) message += `\n\n*Notes:* ${notes}`;
 
-            window.open(`https://wa.me/923261180101?text=${encodeURIComponent(message)}`, '_blank');
+            // The encodeURIComponent function turns \n into %0A automatically
+            const phone = "923261180101";
+            const whatsappUrl = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+
+            window.open(whatsappUrl, '_blank');
 
             // Reset
             cart = {};
