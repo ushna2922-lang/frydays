@@ -991,6 +991,12 @@
             <div id="cartItemsList" class="cart-items"></div>
 
             <div id="cartTotal" class="cart-total"></div>
+            <div style="text-align: center; margin-top: 10px;">
+                <button onclick="clearCart()"
+                    style="background: transparent; border: none; color: #e74c3c; cursor: pointer; font-size: 0.9rem; text-decoration: underline;">
+                    Clear Cart
+                </button>
+            </div>
 
             <textarea id="orderNotes" placeholder="Any special instructions?" class="cart-notes"></textarea>
 
@@ -1009,121 +1015,27 @@
     <!-- JS Scripts -->
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script>
-        // Initialize AOS
-        AOS.init({
-            duration: 800,
-            once: true,
-            disable: false
-        });
+        // 1. Initialize AOS
+        AOS.init({ duration: 800, once: true });
 
-        // Fallback system if AOS fails
-        if (typeof AOS === "undefined") {
-            document.querySelectorAll('[data-aos]').forEach(el => {
-                el.classList.add('no-aos');
-            });
-        }
-
-
-
-        // Mobile Navigation
-        const hamburger = document.querySelector('.hamburger');
-        const navLinks = document.querySelector('.nav-links');
-
-        hamburger.addEventListener('click', () => {
-            navLinks.classList.toggle('active');
-        });
-
-        // Close menu on link click
-        document.querySelectorAll('.nav-links a').forEach(link => {
-            link.addEventListener('click', () => {
-                navLinks.classList.remove('active');
-            });
-        });
-
-        function sendOrder(itemName, price) {
-            const phone = "923261180101";
-            const message = `I want to order ${itemName} from Frydays for Rs. ${price}.`;
-            const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
-            window.open(url, '_blank');
-        }
-
-        // Back to Top functionality
-        document.getElementById('backToTop').addEventListener('click', () => {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        });
-
-        // Lightbox Functionality
-        const lightbox = document.getElementById('lightbox');
-        const lightboxImg = lightbox.querySelector('img');
-        const closeBtn = document.querySelector('.close-lightbox');
-
-
-        document.querySelectorAll('.gallery-item img').forEach(img => {
-            img.addEventListener('click', () => {
-                lightbox.style.display = 'flex';
-                lightboxImg.src = img.src;
-            });
-        });
-
-        closeBtn.addEventListener('click', () => {
-            lightbox.style.display = 'none';
-        });
-
-        lightbox.addEventListener('click', (e) => {
-            if (e.target !== lightboxImg) lightbox.style.display = 'none';
-        });
-
-        // Contact Form Submission (Simulation)
-        document.getElementById('restaurantForm').addEventListener('submit', function (e) {
-            e.preventDefault();
-            alert('Thank you for contacting Love Bites! We will get back to you shortly.');
-            this.reset();
-        });
-
-
-
-
+        // 2. State & Data
+        let cart = JSON.parse(localStorage.getItem('frydaysCart')) || {};
         const SHEETS_API = "https://script.google.com/macros/s/AKfycby9I7sldy-HIIrGJgjILk_y_eEDDSklpX73HJNT4Wf0tyJNMDb0Ca87wj0seb5UsAfC/exec";
 
-        let allMenuItems = [];
-
-        function showLoadingMenu() {
+        // 3. Load Menu from Google Sheets
+        async function loadMenu() {
             const grid = document.querySelector(".menu-grid");
-            grid.innerHTML = `
-        <p style="text-align:center; width:100%; padding:30px;">
-            🍔 Loading delicious menu...
-        </p>
-    `;
-        }
+            grid.innerHTML = '<p style="text-align:center; width:100%; padding:30px;">🍔 Loading delicious menu...</p>';
 
-        async function loadMenu() {
-            try {
-                showLoadingMenu(); // 👈 ADD THIS FIRST
-
-                const res = await fetch(SHEETS_API);
-                const data = await res.json();
-
-                allMenuItems = data;
-                renderMenu(data);
-
-            } catch (err) {
-                console.error("Menu load failed:", err);
-            }
-        }
-
-        async function loadMenu() {
             try {
                 const res = await fetch(SHEETS_API);
                 const data = await res.json();
-
-                allMenuItems = data;
                 renderMenu(data);
             } catch (err) {
                 console.error("Menu load failed:", err);
+                grid.innerHTML = '<p style="text-align:center;">Failed to load menu. Please refresh.</p>';
             }
         }
-
-
 
         function renderMenu(items) {
             const grid = document.querySelector(".menu-grid");
@@ -1131,141 +1043,106 @@
 
             items.forEach(item => {
                 const safeId = item.Name.replace(/\s+/g, '-');
+                const qty = cart[item.Name] ? cart[item.Name].qty : 0;
 
-                const div = document.createElement("div");
-                div.className = "menu-item";
-                div.setAttribute("data-category", item.Category);
-
-                div.innerHTML = `
-            <img src="${item.ImageURL}" class="menu-img">
-
-            <div class="menu-info">
-                <h4>${item.Name}</h4>
-                <p>${item.Description}</p>
-
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:15px;">
-                    
-                    <span class="menu-price">Rs. ${item.Price}</span>
-
-                    <div style="display:flex; align-items:center; gap:10px; background:#f4f4f4; padding:5px 10px; border-radius:20px;">
-                        
-                        <button class="minus-btn" data-name="${item.Name}" data-price="${item.Price}">-</button>
-
-                        <span id="qty-${safeId}" style="font-weight:bold;">0</span>
-
-                        <button class="plus-btn" data-name="${item.Name}" data-price="${item.Price}" 
-                        style="color:var(--primary-color);">+</button>
-
+                grid.innerHTML += `
+            <div class="menu-item" data-category="${item.Category ? item.Category.toLowerCase() : 'all'}" data-aos="zoom-in">
+                <img src="${item.ImageURL}" class="menu-img" alt="${item.Name}">
+                <div class="menu-info">
+                    <div>
+                        <h4>${item.Name}</h4>
+                        <p style="font-size: 0.9rem; color: #666;">${item.Description}</p>
                     </div>
-
+                    <div class="menu-actions" style="display:flex; justify-content:space-between; align-items:center; margin-top:15px;">
+                        <span class="menu-price">Rs. ${item.Price}</span>
+                        <div style="display:flex; align-items:center; gap:10px; background:#f4f4f4; padding:5px 10px; border-radius:20px;">
+                            <button class="minus-btn" data-name="${item.Name}" data-price="${item.Price}">-</button>
+                            <span id="qty-${safeId}" style="font-weight:bold; min-width:25px; text-align:center;">${qty}</span>
+                            <button class="plus-btn" data-name="${item.Name}" data-price="${item.Price}" style="color:var(--primary-color);">+</button>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        `;
-
-                grid.appendChild(div);
+            </div>`;
             });
-
             attachCartButtons();
         }
 
-
-
-        function clearCart() {
-            if (confirm("Are you sure you want to clear your cart?")) {
-                cart = {};
-                localStorage.removeItem('frydaysCart');
-                renderCartUI();
-                toggleCart();
-            }
-        }
-
-
-
-        // cart functionality
-        let cart = JSON.parse(localStorage.getItem('frydaysCart')) || {};
-
+        // 4. Cart Logic
         function updateCart(name, price, change) {
-            if (!cart[name]) {
-                cart[name] = { price: Number(price), qty: 0 };
-            }
-
+            if (!cart[name]) cart[name] = { price: Number(price), qty: 0 };
             cart[name].qty += change;
-
-            if (cart[name].qty <= 0) {
-                delete cart[name];
-            }
+            if (cart[name].qty <= 0) delete cart[name];
 
             localStorage.setItem('frydaysCart', JSON.stringify(cart));
             renderCartUI();
 
-            // shake animation
+            // Shake animation
             const cartBtn = document.querySelector('.whatsapp-float');
-            cartBtn.classList.add('cart-shake');
-            setTimeout(() => cartBtn.classList.remove('cart-shake'), 300);
+            if (cartBtn) {
+                cartBtn.classList.add('cart-shake');
+                setTimeout(() => cartBtn.classList.remove('cart-shake'), 300);
+            }
 
-            // update title
             const totalQty = Object.values(cart).reduce((sum, item) => sum + item.qty, 0);
-            document.title = totalQty > 0
-                ? `(${totalQty}) Frydays Order`
-                : "Frydays | Fries, Burgers & Wraps";
+            document.title = totalQty > 0 ? `(${totalQty}) Frydays Order` : "Frydays | Fries, Burgers & Wraps";
         }
 
         function renderCartUI() {
+            document.querySelectorAll('[id^="qty-"]').forEach(el => el.innerText = '0');
             Object.entries(cart).forEach(([name, data]) => {
                 const el = document.getElementById(`qty-${name.replace(/\s+/g, '-')}`);
                 if (el) el.innerText = data.qty;
             });
-
-            const totalQty = Object.values(cart).reduce((sum, item) => sum + item.qty, 0);
-            document.getElementById('cart-count').innerText = totalQty;
+            document.getElementById('cart-count').innerText = Object.values(cart).reduce((sum, item) => sum + item.qty, 0);
         }
 
+        function attachCartButtons() {
+            document.querySelectorAll(".plus-btn").forEach(btn => {
+                btn.onclick = () => updateCart(btn.dataset.name, btn.dataset.price, 1);
+            });
+            document.querySelectorAll(".minus-btn").forEach(btn => {
+                btn.onclick = () => updateCart(btn.dataset.name, btn.dataset.price, -1);
+            });
+        }
+
+        // 5. Checkout & UI
         function toggleCart() {
             const modal = document.getElementById('cartModal');
             const isOpening = modal.style.display !== 'flex';
-
             modal.style.display = isOpening ? 'flex' : 'none';
 
-            if (!isOpening) return;
+            if (isOpening) {
+                const list = document.getElementById('cartItemsList');
+                const deliveryFee = 150; // Set your delivery fee here
+                list.innerHTML = "";
+                let subtotal = 0;
 
-            const list = document.getElementById('cartItemsList');
-            list.innerHTML = "";
-
-            let subtotal = 0;
-            const deliveryFee = 150;
-
-            Object.entries(cart).forEach(([name, data]) => {
-                list.innerHTML += `
-            <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
-                <span>${data.qty}x ${name}</span>
-                <span>Rs. ${data.price * data.qty}</span>
-                <span>Rs. ${deliveryFee}</span>
-            </div>
-        `;
-                subtotal += data.price * data.qty;
-            });
-
-            let grandTotal = subtotal + deliveryFee;
-
-            document.getElementById('cartTotal').innerText =
-                `Subtotal: Rs. ${subtotal} | Total: Rs. ${grandTotal}`;
-        }
-
-
-        function filterMenu(category) {
-            const items = document.querySelectorAll('.menu-item');
-
-            items.forEach(item => {
-                const cat = item.getAttribute('data-category');
-
-                if (category === 'all' || cat === category) {
-                    item.style.display = 'block';
-                } else {
-                    item.style.display = 'none';
+                // Check if cart is empty
+                if (Object.keys(cart).length === 0) {
+                    list.innerHTML = "<p style='text-align:center; padding:20px;'>Your cart is hungry! 🍔</p>";
+                    document.getElementById('cartTotal').innerText = "";
+                    return;
                 }
-            });
-        }
 
+                // Loop through items
+                Object.entries(cart).forEach(([name, data]) => {
+                    list.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                    <span>${data.qty}x ${name}</span><span>Rs. ${data.price * data.qty}</span>
+                </div>`;
+                    subtotal += (data.price * data.qty);
+                });
+
+                // Add the Delivery Fee line clearly
+                list.innerHTML += `<hr style="margin:10px 0; border:0; border-top:1px solid #eee;">
+                <div style="display:flex; justify-content:space-between; color:#555;">
+                    <span>Delivery Fee</span><span>Rs. ${deliveryFee}</span>
+                </div>`;
+
+                // Calculate and Show Grand Total
+                let grandTotal = subtotal + deliveryFee;
+                document.getElementById('cartTotal').innerText = `Total: Rs. ${grandTotal}`;
+            }
+        }
 
         function sendCartToWhatsApp() {
             const items = Object.entries(cart);
@@ -1273,65 +1150,47 @@
 
             const deliveryFee = 150;
             let subtotal = 0;
-
             let message = "Hi! I want to order from Frydays:%0A";
 
             items.forEach(([name, data]) => {
-                const itemTotal = data.price * data.qty;
-                message += `- ${data.qty}x ${name} (Rs. ${itemTotal})%0A`;
-                subtotal += itemTotal;
+                message += `- ${data.qty}x ${name} (Rs. ${data.price * data.qty})%0A`;
+                subtotal += (data.price * data.qty);
             });
 
-            // ✅ FIX: calculate first, THEN check
-            const minOrder = 600;
+            if (subtotal < 600) return alert("Minimum order for delivery is Rs. 600");
 
-            if (subtotal < minOrder) {
-                alert(`Minimum order is Rs. ${minOrder}. Your current total is Rs. ${subtotal}`);
-                return;
-            }
-
-            let grandTotal = subtotal + DELIVERY_FEE;
-
-            message += `%0A*Subtotal:* Rs. ${subtotal}`;
-            message += `%0A*Delivery Fee:* Rs. ${DELIVERY_FEE}`;
-            message += `%0A*Total Amount:* Rs. ${grandTotal}%0A`;
+            const grandTotal = subtotal + deliveryFee;
+            message += `%0A*Subtotal:* Rs. ${subtotal}%0A*Delivery:* Rs. ${deliveryFee}%0A*Total:* Rs. ${grandTotal}`;
 
             const notes = document.getElementById('orderNotes').value;
-            if (notes) message += `%0A*Notes:* ${notes}`;
+            if (notes) message += `%0A%0A*Notes:* ${notes}`;
 
-            const phone = "923261180101";
-            window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
+            window.open(`https://wa.me/923261180101?text=${encodeURIComponent(message)}`, '_blank');
 
-            // clear cart after order
+            // Reset
             cart = {};
             localStorage.removeItem('frydaysCart');
             renderCartUI();
             toggleCart();
         }
 
-        loadMenu();
-        // Initialize on page load
+        function clearCart() {
+            if (confirm("Are you sure?")) {
+                cart = {};
+                localStorage.removeItem('frydaysCart');
+                renderCartUI();
+                toggleCart();
+            }
+        }
 
-        renderCartUI();
-
-
-        function attachCartButtons() {
-            document.querySelectorAll(".plus-btn").forEach(btn => {
-                btn.addEventListener("click", () => {
-                    const name = btn.getAttribute("data-name");
-                    const price = parseInt(btn.getAttribute("data-price")) || 0;
-                    updateCart(name, price, 1);
-                });
-            });
-
-            document.querySelectorAll(".minus-btn").forEach(btn => {
-                btn.addEventListener("click", () => {
-                    const name = btn.getAttribute("data-name");
-                    const price = parseInt(btn.getAttribute("data-price")) || 0;
-                    updateCart(name, price, -1);
-                });
+        function filterMenu(category) {
+            document.querySelectorAll('.menu-item').forEach(item => {
+                item.style.display = (category === 'all' || item.dataset.category === category) ? 'block' : 'none';
             });
         }
+
+        // Start
+        loadMenu();
     </script>
 </body>
 
